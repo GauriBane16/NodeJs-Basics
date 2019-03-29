@@ -7,7 +7,7 @@ storage.initSync();
  */
 function storeAccountInfo(account) {
     if (typeof account !== 'undefined') {
-        if (account.name && account.username && account.password ) {
+        if (account.name && account.username && account.password) {
             if (typeof (getAccount(account.name)) === 'undefined') {
                 var acc = storage.getItemSync('accounts');
                 if (typeof acc === 'undefined') {

@@ -1,4 +1,4 @@
-var crypto=require('crypto-js');
+var crypto = require('crypto-js');
 var argv = require('yargs')
     .command('create', 'Create account', function (yargs) {
         yargs.options({
@@ -56,46 +56,46 @@ var accounts = storage.getItemSync('encrypteddata');
 // console.log("accounts",accounts)
 switch (cmd) {
     case 'create': if (argv.an && argv.un && argv.pwd && argv.mpwd)
-        createAccount({ accountName: argv.name, userName: argv.un, password: argv.pwd},argv.mpwd);
+        createAccount({ accountName: argv.name, userName: argv.un, password: argv.pwd }, argv.mpwd);
     else
         console.log("Value should not be empty");
         break;
     case 'getDetail': if (argv.un && argv.mpwd)
-        getDetails(argv.un,argv.mpwd);
+        getDetails(argv.un, argv.mpwd);
     else
         console.log("Value should not be empty");
         break;
-    case 'listOfAllAccounts': if(argv.mpwd)
-                                listOfAllAccounts(argv.mpwd);
-                             break;
+    case 'listOfAllAccounts': if (argv.mpwd)
+        listOfAllAccounts(argv.mpwd);
+        break;
     case 'gethelp': console.log("Available commands are 'create', 'getDetail','listOfAllAccounts' & 'gethelp'")
-        break;    
-    default:  console.log("You enterd wrong command, kindly use 'gethelp' command to get details of available command");  
+        break;
+    default: console.log("You enterd wrong command, kindly use 'gethelp' command to get details of available command");
 }
 
-function createAccount(account,secretkey) {
+function createAccount(account, secretkey) {
     if (typeof accounts === 'undefined')
         accounts = [];
-        console.log("Account : ",account);
-        console.log("secretkey : ",secretkey);
-    if (!Verify(account.userName,secretkey)) {
-        console.log("Accounts Array: ",accounts);
-        var data=crypto.AES.encrypt(JSON.stringify(account),secretkey);
-        console.log("Data"+data);
+    console.log("Account : ", account);
+    console.log("secretkey : ", secretkey);
+    if (!Verify(account.userName, secretkey)) {
+        console.log("Accounts Array: ", accounts);
+        var data = crypto.AES.encrypt(JSON.stringify(account), secretkey);
+        console.log("Data" + data);
         accounts.push(data.toString());
-        console.log("Accounts : ",accounts);
+        console.log("Accounts : ", accounts);
         storage.setItemSync('encrypteddata', accounts);
         console.log("Account created successfully");
     } else {
         console.log("Account is already exist");
     }
 }
-function Verify(username,secretkey) {
+function Verify(username, secretkey) {
     var matchedAccount = false
     if (typeof accounts !== 'undefined') {
         // console.log("Accounts in verify: ",JSON.parse(accounts));
         accounts.forEach(function (account) {
-            var data=decryptData(account,secretkey)
+            var data = decryptData(account, secretkey)
             if (data.userName === username) {
                 matchedAccount = true;
                 // console.log(account);
@@ -106,11 +106,11 @@ function Verify(username,secretkey) {
     return matchedAccount;
 }
 
-function getDetails(username,secretkey) {
+function getDetails(username, secretkey) {
     var matchedAccount = false
     if (typeof accounts !== 'undefined') {
         accounts.forEach(function (account) {
-            var data=decryptData(account,secretkey)
+            var data = decryptData(account, secretkey)
             if (data.userName === username) {
                 matchedAccount = true;
                 console.log(data);
@@ -127,7 +127,7 @@ function getDetails(username,secretkey) {
 function listOfAllAccounts(secretkey) {
     if (typeof accounts !== 'undefined') {
         accounts.forEach(function (account) {
-            var data=decryptData(account,secretkey)
+            var data = decryptData(account, secretkey)
             console.log(data);
         });
     }
@@ -136,8 +136,8 @@ function listOfAllAccounts(secretkey) {
     }
 }
 
-function decryptData(account,secretkey){
-    var bytes=crypto.AES.decrypt(account,secretkey);
-            return (JSON.parse(bytes.toString(crypto.enc.Utf8)));
+function decryptData(account, secretkey) {
+    var bytes = crypto.AES.decrypt(account, secretkey);
+    return (JSON.parse(bytes.toString(crypto.enc.Utf8)));
 }
 

@@ -1,18 +1,4 @@
-// function doWork(){
-//     throw new Error("Unable to proceed");
-// }
-// try{
-//     //throw new Error("Unable to proceed");
-//     doWork();
-// }catch(e){
-//     console.log("Error",e.message);
-//     //console.log("Something went wrong");
-// }finally{
-//     console.log("Finally block executed.");
-// }
-// console.log("Try-catch ended");
-
-var crypto=require('crypto-js');
+var crypto = require('crypto-js');
 var argv = require('yargs')
     .command('create', 'Create account', function (yargs) {
         yargs.options({
@@ -63,89 +49,71 @@ var argv = require('yargs')
     .help('help')
     .argv;
 var cmd = argv._[0];
-// console.log("Command", cmd);
 var storage = require('node-persist');
 storage.initSync();
 var accounts = storage.getItemSync('encrypteddata');
-// console.log("accounts",accounts)
 switch (cmd) {
-    case 'create': if (argv.an && argv.un && argv.pwd && argv.mpwd){
-        try{
-            storeAccountInfo({ accountName: argv.name, userName: argv.un, password: argv.pwd},argv.mpwd);
-        }catch(e){
+    case 'create': if (argv.an && argv.un && argv.pwd && argv.mpwd) {
+        try {
+            storeAccountInfo({ accountName: argv.name, userName: argv.un, password: argv.pwd }, argv.mpwd);
+        } catch (e) {
             console.log("Wrong master password");
         }
-        // finally{
-        //     console.log("Finally block executed.");
-        // }
     }
-        
+
     else
         console.log("Value should not be empty");
         break;
-    case 'getDetail': if (argv.un && argv.mpwd){
-        try{
-            //throw new Error("Unable to proceed");
-            getDetails(argv.un,argv.mpwd);
-        }catch(e){
-           // console.log("Error",e.message);
+    case 'getDetail': if (argv.un && argv.mpwd) {
+        try {
+            getDetails(argv.un, argv.mpwd);
+        } catch (e) {
             console.log("Wrong username or wrong master password");
         }
-        // finally{
-        //     console.log("Finally block executed.");
-        // }
     }
-        
+
     else
         console.log("Value should not be empty");
         break;
-    case 'listOfAllAccounts': if(argv.mpwd){
-        try{
-            //throw new Error("Unable to proceed");
+    case 'listOfAllAccounts': if (argv.mpwd) {
+        try {
             listOfAllAccounts(argv.mpwd);
-        }catch(e){
-            //console.log("Error",e.message);
+        } catch (e) {
             console.log("wrong master password");
-            //console.log("Something went wrong");
         }
-        // finally{
-        //     console.log("Finally block executed.");
-        // }
     }
-                                
-                             break;
+
+        break;
     case 'gethelp': console.log("Available commands are 'create', 'getDetail','listOfAllAccounts' & 'gethelp'")
-        break;    
-    default:  console.log("You enterd wrong command, kindly use 'gethelp' command to get details of available command");  
+        break;
+    default: console.log("You enterd wrong command, kindly use 'gethelp' command to get details of available command");
 }
 
-           
-function storeAccountInfo(account,secretkey) {
+
+function storeAccountInfo(account, secretkey) {
     if (typeof accounts === 'undefined')
         accounts = [];
-        console.log("Account : ",account);
-        console.log("secretkey : ",secretkey);
-    if (!Verify(account.name,secretkey)) {
-        console.log("Accounts Array: ",accounts);
-        var data=crypto.AES.encrypt(JSON.stringify(account),secretkey);
-        console.log("Data"+data);
+    console.log("Account : ", account);
+    console.log("secretkey : ", secretkey);
+    if (!Verify(account.name, secretkey)) {
+        console.log("Accounts Array: ", accounts);
+        var data = crypto.AES.encrypt(JSON.stringify(account), secretkey);
+        console.log("Data" + data);
         accounts.push(data.toString());
-        console.log("Accounts : ",accounts);
+        console.log("Accounts : ", accounts);
         storage.setItemSync('encrypteddata', accounts);
         console.log("Account created successfully");
     } else {
         console.log("Account is already exist");
     }
 }
-function Verify(name,secretkey) {
+function Verify(name, secretkey) {
     var matchedAccount = false
     if (typeof accounts !== 'undefined') {
-        // console.log("Accounts in verify: ",JSON.parse(accounts));
         accounts.forEach(function (account) {
-            var data=decryptData(account,secretkey)
+            var data = decryptData(account, secretkey)
             if (data.name === name) {
                 matchedAccount = true;
-                // console.log(account);
             }
         });
     }
@@ -153,11 +121,11 @@ function Verify(name,secretkey) {
     return matchedAccount;
 }
 
-function getDetails(username,secretkey) {
+function getDetails(username, secretkey) {
     var matchedAccount = false
     if (typeof accounts !== 'undefined') {
         accounts.forEach(function (account) {
-            var data=decryptData(account,secretkey)
+            var data = decryptData(account, secretkey)
             if (data.userName === username) {
                 matchedAccount = true;
                 console.log(data);
@@ -174,7 +142,7 @@ function getDetails(username,secretkey) {
 function listOfAllAccounts(secretkey) {
     if (typeof accounts !== 'undefined') {
         accounts.forEach(function (account) {
-            var data=decryptData(account,secretkey)
+            var data = decryptData(account, secretkey)
             console.log(data);
         });
     }
@@ -183,8 +151,22 @@ function listOfAllAccounts(secretkey) {
     }
 }
 
-function decryptData(account,secretkey){
-    var bytes=crypto.AES.decrypt(account,secretkey);
-            return (JSON.parse(bytes.toString(crypto.enc.Utf8)));
+function decryptData(account, secretkey) {
+    var bytes = crypto.AES.decrypt(account, secretkey);
+    return (JSON.parse(bytes.toString(crypto.enc.Utf8)));
 }
+
+// function doWork(){
+//     throw new Error("Unable to proceed");
+// }
+// try{
+//     //throw new Error("Unable to proceed");
+//     doWork();
+// }catch(e){
+//     console.log("Error",e.message);
+//     //console.log("Something went wrong");
+// }finally{
+//     console.log("Finally block executed.");
+// }
+// console.log("Try-catch ended");
 
