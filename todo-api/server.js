@@ -62,7 +62,23 @@ app.delete('/delete/:id',function(req,res){
   res.send({message:'todo is deleted successfully'})
 })
 
+//Update todo by id
 
+app.put('/update/:id',function (req,res){
+  var body = _.pick(req.body, 'description');
+  var todoId=parseInt(req.params.id,10);
+  if(!todoId)
+    return res.status(400).send("Bad request");
+  var todoTupple = _.findWhere(todos, { id: todoId });  
+  if(!todoTupple)
+     return res.status(404).send("No todo found with that id");
+  if (!body.hasOwnProperty('description') || !_.isString(body.description) || body.description.trim().length === 0)
+    return res.status(400).send({ message: "Bad Request" });
+    body.description=body.description.trim();  
+    _.extend(todoTupple,body);
+  //todoTupple.description=body.description.trim();
+    return res.send({ message: "Todo is updated" ,data:todoTupple});
+})
 
 app.listen(PORT, function () {
   console.log("Express server running on " + PORT);
