@@ -14,10 +14,20 @@ app.get('/', function (req, res) {
 })
 
 app.get('/todolist', function (req, res) {
-  if (todos.length == 0)
+  var queryParams=req.query;
+  console.log("queryParams",queryParams);
+  var filteredTodos=todos;
+  console.log("todos",todos);
+   if(queryParams.hasOwnProperty('completed') && queryParams.completed==='true')
+      filteredTodos=_.where(filteredTodos,{completed:true});
+   else if(queryParams.hasOwnProperty('completed') && queryParams.completed==='false')
+   filteredTodos=_.where(filteredTodos,{completed:false});
+   
+  if (filteredTodos.length == 0)
     res.status(404).send("No data");
   else
-    res.json(todos);
+    res.json(filteredTodos);
+
 })
 
 //Get todo by id
@@ -33,10 +43,13 @@ app.get('/todoById/:id', function (req, res) {
 //Add new todo
 app.post('/addTodo', function (req, res) {
   var body = _.pick(req.body, 'description');
+  var todoTupple = _.findWhere(todos, { description: body.description.trim() });
   console.log("Body", body);
   if (!_.isString(body.description) || body.description.trim().length === 0)
     return res.status(400).send({ message: "Bad Request" });
   // var validData=_.pick(req.body,'description')  
+  if(todoTupple)
+     return res.send("This todo is already existed.");
   body.description = body.description.trim()
   body.completed = false;
   body.id = todoNextId++;
@@ -65,16 +78,37 @@ app.delete('/delete/:id',function(req,res){
 //Update todo by id
 
 app.put('/update/:id',function (req,res){
-  var body = _.pick(req.body, 'description');
+  var body = _.pick(req.body, 'description','completed');
   var todoId=parseInt(req.params.id,10);
   if(!todoId)
     return res.status(400).send("Bad request");
   var todoTupple = _.findWhere(todos, { id: todoId });  
   if(!todoTupple)
      return res.status(404).send("No todo found with that id");
-  if (!body.hasOwnProperty('description') || !_.isString(body.description) || body.description.trim().length === 0)
+
+  if ((!body.hasOwnProperty('description') || !_.isString(body.description) || body.description.trim().length === 0) && (!body.hasOwnProperty('completed') || !_.isBoolean(body.completed)))
     return res.status(400).send({ message: "Bad Request" });
-    body.description=body.description.trim();  
+
+    if(body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length!==0)
+       body.description=body.description.trim();  
+    _.extend(todoTupple,body);
+  //todoTupple.description=body.description.trim();
+    return res.send({ message: "Todo is updated" ,data:todoTupple});
+})
+
+//Update todo status by id
+
+app.put('/updateStatus/:id',function (req,res){
+  var body = _.pick(req.body, 'completed');
+  var todoId=parseInt(req.params.id,10);
+  if(!todoId)
+    return res.status(400).send("Bad request");
+  var todoTupple = _.findWhere(todos, { id: todoId });  
+  if(!todoTupple)
+     return res.status(404).send("No todo found with that id");
+  if (!body.hasOwnProperty('completed') || !_.isBoolean(body.completed))
+    return res.status(400).send({ message: "Bad Request" });
+    body.completed=body.completed;  
     _.extend(todoTupple,body);
   //todoTupple.description=body.description.trim();
     return res.send({ message: "Todo is updated" ,data:todoTupple});
