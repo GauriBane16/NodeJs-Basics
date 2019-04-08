@@ -13,6 +13,7 @@ app.get('/', function (req, res) {
   res.send("TODO api...!!!");
 })
 
+// /todolist?completed=true&q=work
 app.get('/todolist', function (req, res) {
   var queryParams=req.query;
   console.log("queryParams",queryParams);
@@ -21,7 +22,10 @@ app.get('/todolist', function (req, res) {
    if(queryParams.hasOwnProperty('completed') && queryParams.completed==='true')
       filteredTodos=_.where(filteredTodos,{completed:true});
    else if(queryParams.hasOwnProperty('completed') && queryParams.completed==='false')
-   filteredTodos=_.where(filteredTodos,{completed:false});
+      filteredTodos=_.where(filteredTodos,{completed:false});
+  if(queryParams.hasOwnProperty('q')){
+      filteredTodos = _.filter(filteredTodos, function(todo){ return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) !==-1; });
+    }
    
   if (filteredTodos.length == 0)
     res.status(404).send("No data");
